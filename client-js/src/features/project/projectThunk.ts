@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://devmorphs.onrender.com/api';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://devmorph-4.onrender.com/api';
 
 async function parseResponse(res: Response) {
   const contentType = res.headers.get('content-type');

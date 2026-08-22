@@ -13,7 +13,7 @@ export default function AdminSignupPage() {
   const [success, setSuccess] = useState("");
   const router = useRouter();
 
-  const API = process.env.NEXT_PUBLIC_API_URL || "https://devmorphs.onrender.com/api";
+  const API = process.env.NEXT_PUBLIC_API_URL || "https://devmorph-4.onrender.com/api";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

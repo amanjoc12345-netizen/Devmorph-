@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASEURL || 'https://devmorphs.onrender.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASEURL || 'https://devmorph-4.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,
