@@ -46,22 +46,32 @@ const connectDB = async () => {
 /* -------------------- Middleware -------------------- */
 app.use(cookieParser());
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
-  process.env.TRUSTED_ORIGIN,
-].filter(Boolean);
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
-        callback(null, true);
-      } else {
-        callback(null, true);
+      // Allow requests with no origin (mobile apps, curl, health checks)
+      if (!origin) return callback(null, origin || true);
+
+      // Allow localhost
+      if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        return callback(null, origin);
       }
+
+      // Allow any Vercel deployment domain (*.vercel.app)
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, origin);
+      }
+
+      // Allow explicit TRUSTED_ORIGIN from env (comma-separated supported)
+      if (process.env.TRUSTED_ORIGIN) {
+        const allowed = process.env.TRUSTED_ORIGIN.split(",").map((s) => s.trim());
+        if (allowed.includes("*") || allowed.includes(origin)) {
+          return callback(null, origin);
+        }
+      }
+
+      // Fallback: return requested origin to prevent CORS block
+      return callback(null, origin);
     },
     credentials: true,
   })
