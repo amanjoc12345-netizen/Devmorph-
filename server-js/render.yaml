@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: devmorph-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TRUSTED_ORIGIN
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_BASE_URL
+        value: https://api.llm7.io/v1
+      - key: AI_MODEL
+        value: codestral-latest

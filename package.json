@@ -1,0 +1,11 @@
+{
+  "name": "devmorph-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix client-js run dev",
+    "dev:server": "npm --prefix server-js start",
+    "build": "npm --prefix client-js run build",
+    "start": "npm --prefix client-js start"
+  }
+}

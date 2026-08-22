@@ -1,0 +1,149 @@
+'use client';
+
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState
+} from 'react';
+import { iframeScript } from '../assets/assets';
+import { Loader2Icon } from 'lucide-react';
+import { Project } from '../types';
+
+export interface ProjectPreviewRef {
+  getCode: () => string | undefined;
+  updateElement: (updates: any) => void;
+  clearSelection: () => void;
+}
+
+interface ProjectPreviewProps {
+  project: Partial<Project> & { current_code?: string };
+  isGenerating: boolean;
+  device?: 'phone' | 'tablet' | 'desktop';
+  showEditorPanel?: boolean;
+}
+
+const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
+  (
+    {
+      project,
+      isGenerating,
+      device = 'desktop',
+      showEditorPanel = true
+    },
+    ref
+  ) => {
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [selectedElement, setSelectedElement] = useState<any>(null);
+    const loadingTexts = [
+      'Creating your website…',
+      'Adding AI magic…',
+      'Designing layouts…',
+      'Optimizing components…',
+      'Almost there…',
+      'This usually takes 5–10 minutes'
+    ];
+
+    const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+
+    useImperativeHandle(ref, () => ({
+      getCode: () => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc) return undefined;
+
+        doc
+          .querySelectorAll('.ai-selected-element,[data-ai-selected]')
+          .forEach((el) => {
+            el.classList.remove('ai-selected-element');
+            el.removeAttribute('data-ai-selected');
+            (el as HTMLElement).style.outline = '';
+          });
+
+        doc.getElementById('ai-preview-style')?.remove();
+        doc.getElementById('ai-preview-script')?.remove();
+
+        return doc.documentElement.outerHTML;
+      },
+      updateElement: (updates: any) => {
+        iframeRef.current?.contentWindow?.postMessage(
+          { type: 'UPDATE_ELEMENT', payload: updates },
+          '*'
+        );
+      },
+      clearSelection: () => {
+        iframeRef.current?.contentWindow?.postMessage(
+          { type: 'CLEAR_SELECTION_REQUEST' },
+          '*'
+        );
+      }
+    }));
+
+    useEffect(() => {
+      if (!isGenerating) return;
+
+      const interval = setInterval(() => {
+        setLoadingTextIndex((i) => (i + 1) % loadingTexts.length);
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }, [isGenerating]);
+
+    useEffect(() => {
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data?.type === 'ELEMENT_SELECTED') {
+          setSelectedElement(event.data.payload);
+        } else if (event.data?.type === 'CLEAR_SELECTION') {
+          setSelectedElement(null);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
+    const injectPreview = (html?: string) => {
+      if (!html) return '';
+      if (!showEditorPanel) return html;
+
+      return html.includes('</body>')
+        ? html.replace('</body>', iframeScript + '</body>')
+        : html + iframeScript;
+    };
+
+    return (
+      <div className="flex-1 h-full w-full flex justify-center bg-gray-50/50 overflow-hidden relative">
+        {project?.current_code ? (
+          <iframe
+            ref={iframeRef}
+            srcDoc={injectPreview(project.current_code)}
+            className={`h-full border-none transition-all duration-300 ease-in-out bg-white ${
+              device === 'phone' 
+                ? 'w-[412px] shadow-2xl border-x border-black/10' 
+                : device === 'tablet' 
+                  ? 'w-[768px] shadow-2xl border-x border-black/10' 
+                  : 'w-full'
+            }`}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        ) : (
+          isGenerating && (
+            <div className="h-full w-full flex flex-col items-center justify-center gap-4 text-indigo-200">
+              <Loader2Icon className="size-7 animate-spin text-lime-600" />
+              <p
+                key={loadingTextIndex}
+                className="text-sm font-medium tracking-wide text-indigo-200 animate-fade-in"
+              >
+                {loadingTexts[loadingTextIndex]}
+              </p>
+            </div>
+          )
+        )}
+      </div>
+    );
+  }
+);
+
+ProjectPreview.displayName = 'ProjectPreview';
+
+export default ProjectPreview;
