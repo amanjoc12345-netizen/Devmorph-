@@ -1,13 +1,13 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "DevMorph Express Backend Server",
   "license": "ISC",
   "author": "",
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'Backend build complete'",
     "start": "node server.js"
   },
   "dependencies": {
@@ -18,13 +18,11 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "mongodb-memory-server": "^11.2.0",
     "mongoose": "^9.1.4",
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11",
     "openai": "^6.16.0",
     "sib-api-v3-sdk": "^8.5.0"
-  },
-  "devDependencies": {
-    "mongodb-memory-server": "^11.2.0"
   }
 }
